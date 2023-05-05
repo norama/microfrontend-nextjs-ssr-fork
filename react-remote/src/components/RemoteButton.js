@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import styled from "@emotion/styled";
+import React, { useState, useEffect } from 'react'
+import styled from '@emotion/styled'
+import PubSub from 'pubsub-js'
 
 const Button = styled.button`
   background-color: #6497b1;
@@ -12,38 +13,45 @@ const Button = styled.button`
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-`;
+`
 
 const RemoteButton = () => {
-  console.log("Remote-App (in remote) rendered");
-  const [remoteCounter, setRemoteCounter] = useState(0);
+  console.log('Remote-App (in remote) rendered')
+  const [remoteCounter, setRemoteCounter] = useState(0)
 
-    // Send message to parent && listen messages from parent
+  // Send message to parent && listen messages from parent
   useEffect(() => {
-    let unsub;
-    let messageTimeout;
+    let unsub
+    let messageTimeout
     if (window.microAppEventBus) {
       const callback = (name) => {
-        console.log(`Hey I am child and I got a new message: ${name}!`);
-      };
-      unsub = window.microAppEventBus.on("microAppParentEventsBus", callback);
+        console.log(`Hey I am child and I got a new message: ${name}!`)
+      }
+      unsub = window.microAppEventBus.on('microAppParentEventsBus', callback)
 
       messageTimeout = setTimeout(() => {
-        microAppEventBus.publish("microAppChildEventsBus", "Oh, hey from child(remote) app");
-      }, 2000);
+        microAppEventBus.publish('microAppChildEventsBus', 'Oh, hey from child(remote) app')
+      }, 2000)
     }
     return () => {
-      unsub && unsub();
-      messageTimeout && clearTimeout(messageTimeout);
-    };
-  }, []);
+      unsub && unsub()
+      messageTimeout && clearTimeout(messageTimeout)
+    }
+  }, [])
   return (
     <>
       <p>
-        Remote Button counter: {remoteCounter}{" "}
-        <Button onClick={() => setRemoteCounter((c) => c + 1)}>Increase</Button>
+        Remote Button counter: {remoteCounter}{' '}
+        <Button
+          onClick={() => {
+            setRemoteCounter((c) => c + 1)
+            PubSub.publish('testMessage', 'INC')
+          }}
+        >
+          Increase
+        </Button>
       </p>
     </>
-  );
-};
-export default RemoteButton;
+  )
+}
+export default RemoteButton

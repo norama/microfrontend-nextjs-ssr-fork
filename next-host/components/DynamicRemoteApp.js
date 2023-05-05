@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useDynamicScript } from '../hooks/useDynamicScript'
 import styled from '@emotion/styled'
-import EventStream from 'eventing-bus/lib/event_stream'
+import PubSub from 'pubsub-js'
 
 const AppWrapper = styled.div`
   position: relative;
@@ -29,20 +29,18 @@ function DynamicRemoteApp({ remoteAppInfo, innerHTMLContent, skeleton, skeletonT
 
   // Send message to child && listen messages from child
   useEffect(() => {
-    const microAppEventBus = new EventStream()
-    window.microAppEventBus = microAppEventBus
-
-    const callback = (name) => {
-      console.log(`Hey I am parent and I got a new message: ${name}!`)
+    const callback = (msg, data) => {
+      console.log(`---> Hey I am parent and I got a new message: ${data}!`)
     }
-    const unsub = microAppEventBus.on('microAppChildEventsBus', callback)
+    const token = PubSub.subscribe('testMessage', callback)
 
     const messageTimeout = setTimeout(() => {
-      microAppEventBus.publish('microAppParentEventsBus', 'Hello from your container')
+      PubSub.publish('testMessage', 'Hello from your container')
     }, 2000)
+
     return () => {
       clearTimeout(messageTimeout)
-      unsub()
+      return PubSub.unsubscribe(token)
     }
   }, [])
 

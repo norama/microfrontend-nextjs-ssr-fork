@@ -1,8 +1,8 @@
-import type { GetStaticProps } from "next";
-import { useState } from "react";
-import ContentLoader from "react-content-loader";
-import DynamicRemoteApp from "../components/DynamicRemoteApp";
-import styled from "@emotion/styled";
+import type { GetStaticProps } from 'next'
+import { useState } from 'react'
+import ContentLoader from 'react-content-loader'
+import DynamicRemoteApp from '../components/DynamicRemoteApp'
+import styled from '@emotion/styled'
 
 const Button = styled.button`
   background-color: #4caf50;
@@ -15,7 +15,7 @@ const Button = styled.button`
   font-size: 16px;
   margin: 4px 2px;
   cursor: pointer;
-`;
+`
 
 const SkeletonWrapper = styled.div`
   position: absolute;
@@ -27,43 +27,34 @@ const SkeletonWrapper = styled.div`
 `
 
 type Props = {
-  innerHTMLContent: string;
-};
+  innerHTMLContent: string
+}
 
 const Home = ({ innerHTMLContent }: Props) => {
-  console.log('Home rendered');
-  
-  const [parentCounter, setParentCounter] = useState(0);
+  console.log('Home rendered')
+
+  const [parentCounter, setParentCounter] = useState(0)
 
   return (
     <div>
       <p>Hello from NextJS</p>
       <div>
-        I am parent counter: {parentCounter}{" "}
-        <Button onClick={() => setParentCounter((pc) => pc + 1)}>
-          Increase Parent
-        </Button>
+        I am parent counter: {parentCounter}{' '}
+        <Button onClick={() => setParentCounter((pc) => pc + 1)}>Increase Parent</Button>
       </div>
       <DynamicRemoteApp
         // We are providing this dynamically, so this can be fetched with getStaticProps or on runtime at client side
         // this will be CDN host probably
         remoteAppInfo={{
-          url: "http://localhost:3001/remoteEntry.js",
-          scope: "TestRemote",
-          module: "./RemoteButtonApp",
+          url: 'http://localhost:3001/remoteEntry.js',
+          scope: 'TestRemote',
+          module: './RemoteButtonApp',
         }}
         innerHTMLContent={innerHTMLContent}
         skeletonThreshold={500}
         skeleton={
           <SkeletonWrapper>
-            <ContentLoader
-              speed={1}
-              width={380}
-              height={84}
-              viewBox="0 0 380 84"
-              backgroundColor="#f6f6ef"
-              foregroundColor="#e8e8e3"
-            >
+            <ContentLoader speed={1} backgroundColor="#f6f6ef" foregroundColor="#e8e8e3">
               <rect x="0" y="4" rx="0" ry="0" width="210" height="13" />
               <rect x="220" y="4" rx="0" ry="0" width="50" height="13" />
             </ContentLoader>
@@ -71,27 +62,25 @@ const Home = ({ innerHTMLContent }: Props) => {
         }
       />
     </div>
-  );
-};
+  )
+}
 
 export const getStaticProps: GetStaticProps = async () => {
-  const preReadyEmotionStyles = [];
+  const preReadyEmotionStyles = []
   // This will be an express server in your custom host
-  const preRender = await fetch("http://localhost:3002/prerender").then((res) =>
-    res.json()
-  );
+  const preRender = await fetch('http://localhost:3002/prerender').then((res) => res.json())
 
   preReadyEmotionStyles.push({
     key: preRender.appName,
     styleId: preRender.styleId,
     styles: preRender.styles,
-  });
+  })
 
   return {
     props: {
       innerHTMLContent: preRender.content,
       preReadyEmotionStyles,
     },
-  };
-};
-export default Home;
+  }
+}
+export default Home

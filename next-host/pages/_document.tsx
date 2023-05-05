@@ -26,6 +26,7 @@ class MyDocument extends Document {
         <Head>
           {/* @ts-ignore */}
           {this.props.pageProps.preReadyEmotionStyles &&
+            /* @ts-ignore */
             this.props.pageProps.preReadyEmotionStyles.map((style: any) => {
               return (
                 <style
