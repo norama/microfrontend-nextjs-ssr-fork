@@ -12,13 +12,14 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 const cache = createCache({ key: appConfig.appName })
 const { extractCriticalToChunks, constructStyleTagsFromChunks } = createEmotionServer(cache)
 
-const PORT = process.env.PORT || 3011
+const PORT = process.env.PORT || 3012
 const app = express()
 
 app.get('/prerender', (req, res) => {
   const html = renderToString(
     React.createElement(CacheProvider, { value: cache }, React.createElement(App, null))
   )
+  console.log('HTML2', html)
   const chunks = extractCriticalToChunks(html)
   const styles = constructStyleTagsFromChunks(chunks)
   const tagStartIndex = styles.indexOf('n="')

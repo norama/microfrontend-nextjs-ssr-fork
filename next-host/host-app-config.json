@@ -1,0 +1,18 @@
+{
+  "remoteApps": [
+    {
+      "appName": "remote-button",
+      "url": "http://localhost:3001/remoteEntry.js",
+      "prerender": "http://localhost:3011/prerender",
+      "scope": "TestRemote",
+      "module": "./RemoteButtonApp"
+    },
+    {
+      "appName": "remote-button-p",
+      "url": "http://localhost:3002/remoteEntry.js",
+      "prerender": "http://localhost:3012/prerender",
+      "scope": "TestRemote2",
+      "module": "./RemoteButtonApp"
+    }
+  ]
+}

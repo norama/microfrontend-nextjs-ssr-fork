@@ -1,0 +1,15 @@
+{
+    "semi": false,
+    "printWidth": 100,
+    "endOfLine": "auto",
+    "singleQuote": true,
+    "jsxBracketSameLine": false,
+    "overrides": [
+      {
+        "files": ["*.css", "*.scss"],
+        "options": {
+          "parser": "css"
+        }
+      }
+    ]
+  }

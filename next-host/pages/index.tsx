@@ -3,6 +3,7 @@ import { useState } from 'react'
 import ContentLoader from 'react-content-loader'
 import DynamicRemoteApp from '../components/DynamicRemoteApp'
 import styled from '@emotion/styled'
+import appConfig from '../host-app-config.json'
 
 const Button = styled.button`
   background-color: #4caf50;
@@ -27,10 +28,10 @@ const SkeletonWrapper = styled.div`
 `
 
 type Props = {
-  innerHTMLContent: string
+  innerHTMLContents: Record<string, string>
 }
 
-const Home = ({ innerHTMLContent }: Props) => {
+const Home = ({ innerHTMLContents }: Props) => {
   console.log('Home rendered')
 
   const [parentCounter, setParentCounter] = useState(0)
@@ -42,43 +43,50 @@ const Home = ({ innerHTMLContent }: Props) => {
         I am parent counter: {parentCounter}{' '}
         <Button onClick={() => setParentCounter((pc) => pc + 1)}>Increase Parent</Button>
       </div>
-      <DynamicRemoteApp
-        // We are providing this dynamically, so this can be fetched with getStaticProps or on runtime at client side
-        // this will be CDN host probably
-        remoteAppInfo={{
-          url: 'http://localhost:3001/remoteEntry.js',
-          scope: 'TestRemote',
-          module: './RemoteButtonApp',
-        }}
-        innerHTMLContent={innerHTMLContent}
-        skeletonThreshold={500}
-        skeleton={
-          <SkeletonWrapper>
-            <ContentLoader speed={1} backgroundColor="#f6f6ef" foregroundColor="#e8e8e3">
-              <rect x="0" y="4" rx="0" ry="0" width="210" height="13" />
-              <rect x="220" y="4" rx="0" ry="0" width="50" height="13" />
-            </ContentLoader>
-          </SkeletonWrapper>
-        }
-      />
+      {appConfig.remoteApps.map((remoteAppInfo) => (
+        <DynamicRemoteApp
+          // We are providing this dynamically, so this can be fetched with getStaticProps or on runtime at client side
+          // this will be CDN host probably
+          key={remoteAppInfo.appName}
+          remoteAppInfo={remoteAppInfo}
+          innerHTMLContent={innerHTMLContents[remoteAppInfo.appName]}
+          skeletonThreshold={500}
+          skeleton={
+            <SkeletonWrapper>
+              <ContentLoader speed={1} backgroundColor="#f6f6ef" foregroundColor="#e8e8e3">
+                <rect x="0" y="4" rx="0" ry="0" width="210" height="13" />
+                <rect x="220" y="4" rx="0" ry="0" width="50" height="13" />
+              </ContentLoader>
+            </SkeletonWrapper>
+          }
+        />
+      ))}
     </div>
   )
 }
 
 export const getStaticProps: GetStaticProps = async () => {
   const preReadyEmotionStyles = []
-  // This will be an express server in your custom host
-  const preRender = await fetch('http://localhost:3002/prerender').then((res) => res.json())
+  const innerHTMLContents = {}
 
-  preReadyEmotionStyles.push({
-    key: preRender.appName,
-    styleId: preRender.styleId,
-    styles: preRender.styles,
-  })
+  for (let i = 0; i < appConfig.remoteApps.length; ++i) {
+    const remoteAppInfo = appConfig.remoteApps[i]
+
+    // This will be an express server in your custom host
+    const preRender = await fetch(remoteAppInfo.prerender).then((res) => res.json())
+
+    innerHTMLContents[preRender.appName] = preRender.content
+
+    preReadyEmotionStyles.push({
+      key: preRender.appName,
+      styleId: preRender.styleId,
+      styles: preRender.styles,
+    })
+  }
 
   return {
     props: {
-      innerHTMLContent: preRender.content,
+      innerHTMLContents,
       preReadyEmotionStyles,
     },
   }
